@@ -305,7 +305,15 @@ let rec free_vars (exp : expr) : VarSet.t =
   ......................................................................*)
 
 let subst (exp : expr) (var_name : varspec) (repl : expr) : expr =
-  failwith "subst not implemented" ;;
+  let rec sub (exp : expr) : expr =
+    match exp with
+    | Var x -> if x = var_name then repl else exp
+    | Int _ -> exp
+    | Unop (op, arg) -> Unop (op, sub arg)
+    | Binop (op, arg1, arg2) -> Binop (op, sub arg1, sub arg2)
+    | Let (x, def, body) -> if x = var_name then Let (x, sub def, body)
+      else Let (x, sub def, sub body)
+  in sub exp ;;
 
 (*......................................................................
   Exercise 17: Complete the eval function below. Try to implement these
