@@ -325,8 +325,31 @@ let subst (exp : expr) (var_name : varspec) (repl : expr) : expr =
 exception UnboundVariable of string ;;
 exception IllFormed of string ;;
 
-let eval (e : expr) : expr =
-  failwith "eval not implemented"
+let unop_eval (op : unop) (e : expr) : expr =
+  match op, e with
+  | Negate, Int i -> Int (~- i)
+  | Negate, _ -> raise (IllFormed "can't negate non-integers") ;;
+
+let binop_eval (op: binop) (e1: expr) (e2: expr) : expr =
+  match op, e1, e2 with
+  | Plus, Int a, Int b -> Int (a + b)
+  | Plus, _, _ -> raise (IllFormed "can't add non-integers")
+  | Minus, Int a, Int b -> Int (a - b)
+  | Minus, _, _ -> raise (IllFormed "can't subtract non-integers")
+  | Times, Int a, Int b -> Int (( * ) a b)
+  | Times, _, _ -> raise (IllFormed "can't multiply non-integers")
+  | Divide, Int a, Int b -> Int (a / b)
+  | Divide, _, _ -> raise (IllFormed "can't divide non-integers")
+
+
+let rec eval (e : expr) : expr =
+  match e with
+  | Int _ -> e
+  | Var x -> raise (UnboundVariable x)
+  | Unop (op, arg) -> unop_eval op (eval arg)
+  | Binop (op, arg1, arg2) -> binop_eval op (eval arg1) (eval arg2)
+  | Let (x, def, body) -> eval (subst body x (eval def)) ;;
+
 
 (*......................................................................
   Go ahead and test eval by evaluating some arithmetic expressions and
