@@ -22,11 +22,15 @@ let test_free_vars  () =
     "free_vars mixed" ;;
 
 let test_subst () =
-  unit_test (
-    let example = Let ("x", Binop (Plus, Var "x", Var "y"),
-                       Binop (Times, Var "z", Var "x")) in
-    subst example "x" (Var "q") = Let ("q", Binop (Plus, Var "x", Var "y"),
-                                       Binop (Times, Var "z", Var "q"))) "test_subst var4var";;
+
+  let example = (Let ("x", Binop (Plus, Var "x", Var "y"),
+                      Binop (Times, Var "z", Var "x"))) in
+  let answer = subst example "x" (Var "q") in
+  unit_test ((free_vars (answer))
+             = VarSet.(empty
+                       |> add "q"
+                       |> add "y"
+                       |> add "z")) "test_subst var4var";;
 
 let test_all () =
   test_free_vars () ;
