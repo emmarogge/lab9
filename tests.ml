@@ -12,11 +12,24 @@ let unit_test (condition : bool) (msg : string) =
   else print_endline (msg ^ " failed");;
 
 let test_free_vars  () =
-unit_test ((free_vars (Let ("x", Binop (Plus, Var "x", Var "y"),
-                            Binop (Divide, Var "z", Var "x"))))
-= [Var "x"; Var "y"; Var "z"]) "free_vars mixed";;
+  unit_test
+    ((free_vars (Let ("x", Binop (Plus, Var "x", Var "y"),
+                      Binop (Divide, Var "z", Var "x"))))
+     = VarSet.(empty
+               |> add "x"
+               |> add "y"
+               |> add "z"))
+    "free_vars mixed" ;;
+
+let test_subst () =
+  unit_test (
+    let example = Let ("x", Binop (Plus, Var "x", Var "y"),
+                       Binop (Times, Var "z", Var "x")) in
+    subst example "x" (Var "q") = Let ("q", Binop (Plus, Var "x", Var "y"),
+                                       Binop (Times, Var "z", Var "q"))) "test_subst var4var";;
 
 let test_all () =
-  test_free_vars () ;;
+  test_free_vars () ;
+  test_subst () ;;
 
 let _ = test_all () ;;
