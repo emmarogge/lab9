@@ -32,8 +32,15 @@ let test_subst () =
                        |> add "y"
                        |> add "z")) "test_subst var4var";;
 
+let test_eval () =
+  unit_test (eval (Let ("x", Int 6,
+                        Let ("y", Int 3,
+                             Binop (Times, Var "x", Var "y")))) = Int 18)
+    "eval mixed" ;;
+
 let test_all () =
   test_free_vars () ;
-  test_subst () ;;
+  test_subst () ;
+  test_eval () ;;
 
 let _ = test_all () ;;
